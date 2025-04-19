@@ -1,0 +1,21 @@
+﻿# Ignore Visual Studio system files
+.vs/
+*.user
+*.suo
+
+# Ignore build output
+bin/
+obj/
+
+# Ignore build logs
+*.log
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore database files
+*.db
+
+# Others
+*.vsidx
