@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CyberSafeChatbot
@@ -9,7 +6,7 @@ namespace CyberSafeChatbot
     public class ChatBot
     {
         private string userName;
-        private KnowledgeBase knowledgeBase;
+        private readonly KnowledgeBase knowledgeBase;
 
         public ChatBot()
         {
@@ -18,46 +15,109 @@ namespace CyberSafeChatbot
 
         public async Task StartAsync()
         {
-            // 1. Ask user for their name
-            Console.Write("Hello! What's your name? ");
-            userName = Console.ReadLine();
+            // Get user's name
+            ConsoleUI.PrintColoredText("What's your name? ", ConsoleColor.Cyan);
+            userName = Console.ReadLine()?.Trim() ?? "Friend";
 
-            // 2. Default to "Friend" if name is null or empty
-            if (string.IsNullOrWhiteSpace(userName))
-            {
-                userName = "Friend";
-            }
+            // Welcome message
+            Console.WriteLine();
+            await ConsoleUI.TypeTextAsync($"Hello, {userName}! I'm your CyberSafe assistant. I can help you learn about cybersecurity in South Africa.");
 
-            // 3. Display a personalised welcome message using typing animation
-            await ConsoleUI.TypeTextAsync($"Welcome, {userName}! I'm here to help you stay safe online.");
+            DisplayMenu(); // [Updated] Show menu after welcome
 
-            // 4. Show list of topics
-            await ConsoleUI.TypeTextAsync("\nHere are some topics I can help you with:");
-            await ConsoleUI.TypeTextAsync("- Passwords\n- Phishing\n- Browsing\n- Mobile\n- Social\n- Ransomware\n- Wi-Fi");
+            ConsoleUI.PrintColoredText("Type 'exit' or 'quit' to end our chat.\n", ConsoleColor.DarkGray);
 
-            // 5. Inform the user how to exit
-            await ConsoleUI.TypeTextAsync("\nYou can type 'exit' or 'quit' at any time to leave the chat.");
-
-            string input;
-
-            // 6. Main interaction loop
             while (true)
             {
-                Console.Write("\nAsk me a question or enter a topic: ");
-                input = Console.ReadLine()?.Trim().ToLower();
+                ConsoleUI.PrintColoredText("\nWhat would you like to know about? ", ConsoleColor.Cyan);
+                string input = Console.ReadLine()?.Trim().ToLower();
 
-                // 6c. Exit conditions
+                if (string.IsNullOrWhiteSpace(input))
+                    continue;
+
+                // [Updated] Support numeric topic shortcuts
+                input = input switch
+                {
+                    "1" => "password",
+                    "2" => "phishing",
+                    "3" => "mobile",
+                    "4" => "browsing",
+                    "5" => "social",
+                    "6" => "ransomware",
+                    "7" => "wifi",
+                    _ => input
+                };
+
                 if (input == "exit" || input == "quit")
                 {
-                    await ConsoleUI.TypeTextAsync($"Goodbye, {userName}. Stay cyber-safe!");
+                    await AudioManager.PlayAudioAsync("goodbye.wav"); // [Updated]
+                    await ConsoleUI.TypeTextAsync($"\nGoodbye, {userName}! Stay safe online.");
                     break;
                 }
 
-                // 6d. Get and display response
+                if (input == "help") // [Updated]
+                {
+                    await AudioManager.PlayAudioAsync("help.wav");
+                    DisplayMenu();
+                    continue;
+                }
+
                 string response = knowledgeBase.GetResponse(input);
-                await ConsoleUI.TypeTextAsync(response);
+
+                // [Updated] Handle unknown input
+                if (response.StartsWith("I'm not sure") || response.StartsWith("Sorry, I couldn’t understand"))
+                {
+                    await AudioManager.PlayAudioAsync("unknown.wav");
+                    await AudioManager.PlayAudioAsync("help.wav");
+
+                    Console.WriteLine();
+                    await ConsoleUI.TypeTextAsync(response);
+                    DisplayMenu();
+                }
+                else
+                {
+                    Console.WriteLine();
+
+                    // [Updated] Determine and play topic voice-over
+                    string audioFile = input switch
+                    {
+                        "password" => "password.wav",
+                        "phishing" => "phishing.wav",
+                        "mobile" => "mobile.wav",
+                        "browsing" => "browsing.wav",
+                        "social" => "social.wav",
+                        "ransomware" => "ransomware.wav",
+                        "wifi" => "wifi.wav",
+                        _ => null
+                    };
+
+                    if (!string.IsNullOrEmpty(audioFile))
+                    {
+                        ConsoleUI.PrintColoredText($"🔊 Now reading: {ToTitleCase(input)}", ConsoleColor.Yellow); // [Updated]
+                        await AudioManager.PlayAudioAsync(audioFile);
+                    }
+
+                    await ConsoleUI.TypeTextAsync(response);
+                }
             }
+        }
+
+        private void DisplayMenu() // [Updated]
+        {
+            ConsoleUI.PrintColoredText(@"
+1. Strong Passwords
+2. Phishing Scams
+3. Mobile Security
+4. Safe Browsing
+5. Social Media Safety
+6. Ransomware Protection
+7. Wi-Fi Security
+", ConsoleColor.DarkCyan);
+        }
+
+        private string ToTitleCase(string input)
+        {
+            return System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input);
         }
     }
 }
-
