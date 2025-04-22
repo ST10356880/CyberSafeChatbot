@@ -20,6 +20,5 @@ obj/
 # Others
 *.vsidx
 
-
-Audio/
-*.wav
+# Ignore audio files but keep the folder
+Audio/*.wav

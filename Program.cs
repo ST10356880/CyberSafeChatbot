@@ -19,8 +19,8 @@ namespace CyberSafeChatbot
             // 4. Add a blank line for spacing.
             Console.WriteLine();
 
-            // 5. Play a welcome audio message asynchronously.
-            await AudioManager.PlayWelcomeAudioAsync();
+            // 5. Play the welcome.wav audio asynchronously.
+            await AudioManager.PlayAudioAsync("welcome.wav"); // [Updated] Replaced old welcome audio method with new dynamic PlayAudioAsync
 
             // 6. Create an instance of the ChatBot.
             var chatBot = new ChatBot();
@@ -28,13 +28,12 @@ namespace CyberSafeChatbot
             // 7. Start the ChatBot's main interaction loop asynchronously.
             await chatBot.StartAsync();
 
-            // 8. After chatbot ends, display a green-colored thank you message.
-            ConsoleUI.PrintColoredText("\nThank you for using CyberSafe Chatbot. Stay safe online!", ConsoleColor.Green);
-
-            // 9. Prompt the user to press any key to exit.
+            
+           
+            // 8. Prompt the user to press any key to exit.
             Console.WriteLine("\nPress any key to exit...");
 
-            // 10. Wait for any key press before closing the application.
+            // 9. Wait for any key press before closing the application.
             Console.ReadKey();
         }
     }

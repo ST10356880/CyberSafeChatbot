@@ -64,21 +64,20 @@ namespace CyberSafeChatbot
 
                 string response = knowledgeBase.GetResponse(input);
 
-                // [Updated] Handle unknown input
+                // [Updated] Handle fallback message
                 if (response.StartsWith("I'm not sure") || response.StartsWith("Sorry, I couldn’t understand"))
                 {
+                    await ConsoleUI.TypeTextAsync(response); // [Updated] Show fallback text first
                     await AudioManager.PlayAudioAsync("unknown.wav");
                     await AudioManager.PlayAudioAsync("help.wav");
-
-                    Console.WriteLine();
-                    await ConsoleUI.TypeTextAsync(response);
                     DisplayMenu();
                 }
                 else
                 {
                     Console.WriteLine();
+                    await ConsoleUI.TypeTextAsync(response); // [Updated] Show response first
 
-                    // [Updated] Determine and play topic voice-over
+                    // [Updated] Then play voice-over
                     string audioFile = input switch
                     {
                         "password" => "password.wav",
@@ -93,11 +92,9 @@ namespace CyberSafeChatbot
 
                     if (!string.IsNullOrEmpty(audioFile))
                     {
-                        ConsoleUI.PrintColoredText($"🔊 Now reading: {ToTitleCase(input)}", ConsoleColor.Yellow); // [Updated]
+                        ConsoleUI.PrintColoredText($"🔊 Now reading: {ToTitleCase(input)}", ConsoleColor.Yellow);
                         await AudioManager.PlayAudioAsync(audioFile);
                     }
-
-                    await ConsoleUI.TypeTextAsync(response);
                 }
             }
         }
