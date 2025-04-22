@@ -1,6 +1,5 @@
 ﻿using System.Text;
 
-
 namespace CyberSafeChatbot
 {
     public static class ConsoleUI
@@ -9,7 +8,6 @@ namespace CyberSafeChatbot
         {
             try
             {
-                // Set output encoding if using extended ASCII characters in logo
                 Console.OutputEncoding = Encoding.UTF8;
             }
             catch (IOException ex)
@@ -17,24 +15,51 @@ namespace CyberSafeChatbot
                 Console.WriteLine($"Failed to set console encoding: {ex.Message}");
             }
 
-            // Configure console title
             Console.Title = "CyberSafe Chatbot";
         }
 
         public static void DisplayLogo()
         {
-            const string logo = @"
-     ██████╗██╗   ██╗██████╗ ███████╗██████╗ ███████╗ █████╗ ███████╗███████╗
-    ██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔════╝██╔══██╗██╔════╝██╔════╝
-    ██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝███████╗███████║█████╗  █████╗  
-    ██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗╚════██║██╔══██║██╔══╝  ██╔══╝  
-    ╚██████╗   ██║   ██████╔╝███████╗██║  ██║███████║██║  ██║██║     ███████╗
-     ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝
-    ";
-            PrintColoredText(logo, ConsoleColor.Cyan);
+            string[] logoLines = new[]
+            {
+                " ██████╗██╗   ██╗██████╗ ███████╗██████╗ ███████╗ █████╗ ███████╗███████╗",
+                "██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔════╝██╔══██╗██╔════╝██╔════╝",
+                "██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝███████╗███████║█████╗  █████╗  ",
+                "██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗╚════██║██╔══██║██╔══╝  ██╔══╝  ",
+                "╚██████╗   ██║   ██████╔╝███████╗██║  ██║███████║██║  ██║██║     ███████╗",
+                " ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝"
+            };
 
-            // Welcome message under artwork
+            int logoWidth = logoLines.Max(line => line.Length) + 4; // +4 for padding and borders
+            int windowWidth = Console.WindowWidth;
+            int padding = Math.Max((windowWidth - logoWidth) / 2, 0);
+
+            string topBorder = "┌" + new string('─', logoWidth - 2) + "┐";
+            string bottomBorder = "└" + new string('─', logoWidth - 2) + "┘";
+
+            PrintCenteredLine(topBorder, padding, ConsoleColor.Cyan);
+            foreach (var line in logoLines)
+            {
+                string paddedLine = line.PadRight(logoWidth - 4); // account for "│ │"
+                PrintCenteredLine($"│ {paddedLine} │", padding, ConsoleColor.Cyan);
+            }
+            PrintCenteredLine(bottomBorder, padding, ConsoleColor.Cyan);
+
             PrintColoredText("\nHello and welcome to the CyberSafe Chatbot! I’m excited to assist you in discovering ways to protect yourself online. Let’s dive in!\n", ConsoleColor.White);
+        }
+
+        private static void PrintCenteredLine(string text, int padding, ConsoleColor color)
+        {
+            var previousColor = Console.ForegroundColor;
+            try
+            {
+                Console.ForegroundColor = color;
+                Console.WriteLine(new string(' ', padding) + text);
+            }
+            finally
+            {
+                Console.ForegroundColor = previousColor;
+            }
         }
 
         public static void PrintColoredText(string text, ConsoleColor color)
@@ -56,9 +81,9 @@ namespace CyberSafeChatbot
             foreach (char c in text)
             {
                 Console.Write(c);
-                await Task.Delay(delay); // Delay for typing effect
+                await Task.Delay(delay);
             }
-            Console.WriteLine(); // New line after the message
+            Console.WriteLine();
         }
     }
 }
