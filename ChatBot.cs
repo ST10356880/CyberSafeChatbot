@@ -16,8 +16,18 @@ namespace CyberSafeChatbot
         public async Task StartAsync()
         {
             // Get user's name
-            ConsoleUI.PrintColoredText("What's your name? ", ConsoleColor.Cyan);
-            userName = Console.ReadLine()?.Trim() ?? "Friend";
+            string inputName;
+            do
+            {
+                ConsoleUI.PrintColoredText("What's your name? ", ConsoleColor.Cyan);
+                inputName = Console.ReadLine()?.Trim();
+            }
+            while (string.IsNullOrWhiteSpace(inputName));
+
+            userName = inputName;
+
+            Console.WriteLine();
+
 
             // Welcome message
             Console.WriteLine();
