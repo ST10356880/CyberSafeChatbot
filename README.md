@@ -41,5 +41,7 @@ This chatbot educates users on essential cybersecurity topics such as:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/CyberSafeChatbot.git
+   git clone https://github.com/ST10356880/CyberSafeChatbot.git
    cd CyberSafeChatbot
+
+
