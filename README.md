@@ -1,10 +1,10 @@
-﻿# 💬 CyberSafe Chatbot
+﻿# CyberSafe Chatbot
 
 A C# console application designed to help South African citizens learn about **cybersecurity awareness** in a friendly, interactive way.
 
 ---
 
-## 🎯 Purpose
+## Purpose
 
 This chatbot educates users on essential cybersecurity topics such as:
 
@@ -18,7 +18,7 @@ This chatbot educates users on essential cybersecurity topics such as:
 
 ---
 
-## 🛠️ Built With
+## 🛠Built With
 
 - **C#**
 - **.NET 6+**
@@ -27,7 +27,7 @@ This chatbot educates users on essential cybersecurity topics such as:
 
 ---
 
-## 🧠 Features
+## Features
 
 - Natural question-response interaction
 - Typing animation and coloured console output
@@ -37,7 +37,7 @@ This chatbot educates users on essential cybersecurity topics such as:
 
 ---
 
-## 🚀 How to Run
+## How to Run
 
 1. Clone the repository:
    ```bash

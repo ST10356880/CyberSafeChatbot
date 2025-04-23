@@ -38,3 +38,8 @@ namespace CyberSafeChatbot
         }
     }
 }
+// Troelsen, A. and Japikse, P. (2022) Pro C# 10 with .NET 6: Foundational principles and practices in programming. 11th ed. Berlin, Germany: APress.
+
+// https://youtu.be/wxznTygnRfQ?si=dGSmrUza34xHX8t9
+
+// https://chatgpt.com/share/68092fdd-403c-800b-903c-6c2ac1dda1b2
