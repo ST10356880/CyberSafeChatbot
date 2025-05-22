@@ -1,81 +1,95 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 namespace CyberSafeChatbot
 {
+    /// <summary>
+    /// Stores the knowledge base of the chatbot, including topics, keywords, responses, and sentiment handling.
+    /// </summary>
     public class KnowledgeBase
     {
-        private Dictionary<string, Topic> topics;
+        private static readonly Random random = new Random();
 
-        public KnowledgeBase()
+        // Dictionary mapping topics to a list of keywords for matching user input
+        private readonly Dictionary<string, List<string>> topics = new(StringComparer.OrdinalIgnoreCase)
         {
-            topics = new Dictionary<string, Topic>
-            {
-                ["password"] = new Topic(
-                    new[] { "password", "strong password", "passwords", "secure password" },
-                    "Use strong passwords with a mix of letters, numbers, and symbols. Avoid using personal info and don't reuse passwords across sites."
-                ),
-                ["phishing"] = new Topic(
-                    new[] { "phishing", "email scam", "scam email", "fake email", "fraud" },
-                    "Be cautious with unsolicited emails. Look out for suspicious links, urgent language, and sender address mismatches."
-                ),
-                ["browsing"] = new Topic(
-                    new[] { "browsing", "safe browsing", "web safety", "internet safety", "secure browsing" },
-                    "Always check for HTTPS in URLs. Avoid downloading files from unknown sources and keep your browser up-to-date."
-                ),
-                ["mobile"] = new Topic(
-                    new[] { "mobile", "phone security", "app safety", "smartphone", "android", "ios" },
-                    "Keep your phone OS and apps updated. Only install apps from trusted sources like the Google Play Store or Apple App Store."
-                ),
-                ["social"] = new Topic(
-                    new[] { "social", "social media", "facebook", "instagram", "twitter", "privacy" },
-                    "Limit the personal information you share on social media. Use privacy settings and be cautious when accepting friend requests."
-                ),
-                ["ransomware"] = new Topic(
-                    new[] { "ransomware", "malware", "data lock", "hacking", "virus" },
-                    "Regularly back up your data and never click on suspicious links or attachments. Install trusted antivirus software."
-                ),
-                ["wifi"] = new Topic(
-                    new[] { "wifi", "wi-fi", "wireless", "network", "public wifi" },
-                    "Avoid using public Wi-Fi for sensitive transactions. Use a VPN when connecting to unsecured networks."
-                )
-            };
-        }
+            { "phishing", new() { "phishing", "fake email", "scam email", "fraudulent email" } },
+            { "malware", new() { "malware", "virus", "trojan", "spyware", "ransomware" } },
+            { "passwords", new() { "password", "passwords", "strong password", "password manager" } },
+            { "social engineering", new() { "social engineering", "trick", "manipulate", "impersonate" } },
+            { "safe browsing", new() { "safe browsing", "secure websites", "https", "safe internet" } },
+            { "mobile security", new() { "mobile", "smartphone", "phone security", "app permissions" } },
+            { "updates", new() { "update", "patch", "software update", "system update" } },
+            { "wi-fi", new() { "wi-fi", "wifi", "public wifi", "secure connection" } },
+            { "identity theft", new() { "identity theft", "stolen identity", "impersonation" } },
+            { "cyberbullying", new() { "cyberbullying", "online bullying", "harassment", "abuse" } },
+            { "support", new() { "help", "support", "report", "contact", "emergency" } }
+        };
 
-        public string GetResponse(string userInput)
+        // Dictionary mapping topics to a list of response-follow-up pairs
+        private readonly Dictionary<string, List<(string Response, string FollowUp)>> responses = new(StringComparer.OrdinalIgnoreCase)
         {
-            foreach (var topic in topics.Values)
+            { "phishing", new() { ("Phishing attacks try to trick you into giving away personal info. Always verify links and emails.", "Do you want tips to recognize phishing emails?"),
+                                  ("Avoid clicking suspicious links or downloading attachments from unknown senders.", "Have you ever received a suspicious email?") } },
+
+            { "malware", new() { ("Malware is harmful software designed to damage or steal information. Use antivirus software to protect yourself.", "Want to know how to spot malware symptoms?"),
+                                 ("Keep your devices secure by avoiding untrusted downloads and websites.", "Would you like guidance on malware removal?") } },
+
+            { "passwords", new() { ("Strong passwords should include uppercase letters, numbers, and symbols.", "Need help creating a secure password?"),
+                                   ("Using a password manager can help you store and generate complex passwords.", "Want to know which password managers are best?") } },
+
+            { "support", new() { ("For help, contact your service provider or local authority. Always report suspicious activity.", "Do you need a list of emergency cyber helplines?"),
+                                 ("Support is available. You're not alone. Reach out if you've been targeted.", "Would you like steps on how to report cybercrime?") } }
+        };
+
+        /// <summary>
+        /// Gets all defined topics.
+        /// </summary>
+        public List<string> GetAllTopics() => new(topics.Keys);
+
+        /// <summary>
+        /// Attempts to match the user input to a known topic.
+        /// </summary>
+        public string GetTopicFromInput(string userInput)
+        {
+            foreach (var (topic, keywords) in topics)
             {
-                foreach (var keyword in topic.Keywords)
+                if (keywords.Exists(keyword => userInput.Contains(keyword, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (userInput.Contains(keyword))
-                    {
-                        return topic.Response;
-                    }
+                    Console.WriteLine($"Matched Topic: {topic}"); // Debugging
+                    return topic;
                 }
             }
-
-            // If no match is found
-            return "Sorry, I couldn’t understand that. Try asking about topics like: passwords, phishing, browsing, mobile, social, ransomware, or Wi-Fi.";
+            return null; // No match found
         }
 
-        private class Topic
+        /// <summary>
+        /// Returns a random response-follow-up pair for the given topic.
+        /// </summary>
+        public (string Response, string FollowUp) GetRandomResponse(string topic)
         {
-            public string[] Keywords { get; }
-            public string Response { get; }
-
-            public Topic(string[] keywords, string response)
+            if (responses.TryGetValue(topic, out var responseList) && responseList.Count > 0)
             {
-                Keywords = keywords;
-                Response = response;
+                return responseList[random.Next(responseList.Count)];
             }
+            return ("I'm still learning about that topic! Feel free to ask another question.", "");
+        }
+
+        /// <summary>
+        /// Generates a sentiment-aware response by adjusting tone based on user emotion.
+        /// </summary>
+        public string GetSentimentResponse(string baseResponse, string sentiment)
+        {
+            return sentiment?.ToLower() switch
+            {
+                "positive" => $"{baseResponse} I'm glad you're feeling confident about your online safety!",
+                "negative" => $"{baseResponse} It's okay to feel concerned. Cybersecurity can be tricky, but you're not alone.",
+                "neutral" => $"{baseResponse} Let me know if you'd like more information on this.",
+                "anxious" => $"{baseResponse} No worries. I'm here to guide you step-by-step.",
+                "angry" => $"{baseResponse} I understand this can be frustrating. Let's work through it together.",
+                "confused" => $"{baseResponse} Feel free to ask me anything you'd like me to explain further.",
+                _ => baseResponse
+            };
         }
     }
 }
-// Troelsen, A. and Japikse, P. (2022) Pro C# 10 with .NET 6: Foundational principles and practices in programming. 11th ed. Berlin, Germany: APress.
-
-// https://youtu.be/wxznTygnRfQ?si=dGSmrUza34xHX8t9
-
-// https://chatgpt.com/share/68092fdd-403c-800b-903c-6c2ac1dda1b2
