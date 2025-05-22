@@ -91,5 +91,20 @@ namespace CyberSafeChatbot
                 _ => baseResponse
             };
         }
+
+        internal string? DetectSentiment(string input)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool IsFollowUpQuestion(string input)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal string GetResponse(string input)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
