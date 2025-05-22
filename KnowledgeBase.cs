@@ -92,19 +92,60 @@ namespace CyberSafeChatbot
             };
         }
 
-        internal string? DetectSentiment(string input)
+        public string DetectSentiment(string input)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(input)) return "neutral";
+
+            // Simple sentiment detection based on keywords
+            var positiveWords = new List<string> { "good", "happy", "safe", "secure", "great", "confident" };
+            var negativeWords = new List<string> { "bad", "scared", "unsafe", "hacked", "problem", "worried" };
+            var anxiousWords = new List<string> { "nervous", "anxious", "concerned", "stress", "afraid" };
+            var angryWords = new List<string> { "angry", "frustrated", "upset", "annoyed" };
+            var confusedWords = new List<string> { "confused", "unsure", "uncertain", "lost" };
+
+            input = input.ToLower();
+
+            if (positiveWords.Exists(word => input.Contains(word))) return "positive";
+            if (negativeWords.Exists(word => input.Contains(word))) return "negative";
+            if (anxiousWords.Exists(word => input.Contains(word))) return "anxious";
+            if (angryWords.Exists(word => input.Contains(word))) return "angry";
+            if (confusedWords.Exists(word => input.Contains(word))) return "confused";
+
+            return "neutral"; // Default sentiment
         }
 
-        internal bool IsFollowUpQuestion(string input)
+
+        public bool IsFollowUpQuestion(string input)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(input)) return false;
+
+            var followUpPhrases = new List<string>
+    {
+        "tell me more", "can you elaborate", "what about", "how does that work",
+        "why", "how", "what if", "can I", "should I", "do I need to"
+    };
+
+            input = input.ToLower();
+
+            return followUpPhrases.Exists(phrase => input.StartsWith(phrase));
         }
 
-        internal string GetResponse(string input)
+
+        public string GetResponse(string input)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(input))
+                return "Could you clarify what you mean? I want to help you as best I can!";
+
+            var generalResponses = new List<string>
+    {
+        "Cybersecurity is essential! What aspect of online safety would you like to learn more about?",
+        "I can help with cybersecurity topics like phishing, strong passwords, or safe browsing. What would you like to ask?",
+        "That's an interesting topic! Could you provide more details so I can assist better?",
+        "I'm here to help you stay safe online. Feel free to ask about any cybersecurity concerns you have!"
+    };
+
+            return generalResponses[random.Next(generalResponses.Count)];
         }
+
     }
 }
