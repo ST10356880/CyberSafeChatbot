@@ -6,11 +6,13 @@ namespace CyberSafeChatbot
 {
     public class ChatBot
     {
-        // Add private fields at the top of the class
         private string userName;
         private string lastTopic;
         private string userSentiment;
         private bool askedFollowUp = false;
+        private bool waitingForYesNo = false;
+        private string pendingFollowUpTopic;
+
         private readonly KnowledgeBase knowledgeBase;
         private readonly List<string> userInterests = new();
         private readonly List<string> conversationHistory = new();
@@ -22,7 +24,6 @@ namespace CyberSafeChatbot
 
         public async Task StartAsync()
         {
-            // Get user's name
             string inputName;
             do
             {
@@ -32,12 +33,12 @@ namespace CyberSafeChatbot
             while (string.IsNullOrWhiteSpace(inputName));
 
             userName = inputName;
-            conversationHistory.Add(userName); // After getting userName
+            conversationHistory.Add(userName);
 
             Console.WriteLine();
             await ConsoleUI.TypeTextAsync($"Hello, {userName}! I'm your CyberSafe assistant. I can help you learn about cybersecurity in South Africa.");
 
-            DisplayMenu(); // Show menu after welcome
+            DisplayMenu();
             ConsoleUI.PrintColoredText("Type 'exit' or 'quit' to end our chat.\n", ConsoleColor.DarkGray);
 
             while (true)
@@ -48,8 +49,9 @@ namespace CyberSafeChatbot
                 if (string.IsNullOrWhiteSpace(input))
                     continue;
 
-                conversationHistory.Add(input); // Add user input to history
+                conversationHistory.Add(input);
 
+                // Handle menu shortcuts
                 input = input switch
                 {
                     "1" => "password",
@@ -62,6 +64,7 @@ namespace CyberSafeChatbot
                     _ => input
                 };
 
+                // Check for exit
                 if (input == "exit" || input == "quit")
                 {
                     await AudioManager.PlayAudioAsync("goodbye.wav");
@@ -69,6 +72,7 @@ namespace CyberSafeChatbot
                     break;
                 }
 
+                // Display help menu
                 if (input == "help")
                 {
                     await AudioManager.PlayAudioAsync("help.wav");
@@ -76,14 +80,28 @@ namespace CyberSafeChatbot
                     continue;
                 }
 
+                // Respond to follow-up yes/no
+                if (waitingForYesNo && (input == "yes" || input == "no"))
+                {
+                    if (input == "yes")
+                    {
+                        string moreInfo = knowledgeBase.GetFollowUpDetail(pendingFollowUpTopic);
+                        await ConsoleUI.TypeTextAsync(moreInfo);
+                    }
+                    else
+                    {
+                        await ConsoleUI.TypeTextAsync("No problem. Let me know if there's something else you'd like help with.");
+                    }
+                    waitingForYesNo = false;
+                    pendingFollowUpTopic = null;
+                    continue;
+                }
+
                 // Detect sentiment
                 var sentiment = knowledgeBase.DetectSentiment(input);
                 if (!string.IsNullOrWhiteSpace(sentiment))
-                {
                     userSentiment = sentiment;
-                }
 
-                // Determine if it's a follow-up question
                 bool isFollowUp = knowledgeBase.IsFollowUpQuestion(input);
                 string topic = knowledgeBase.GetTopicFromInput(input);
 
@@ -96,7 +114,6 @@ namespace CyberSafeChatbot
                 if (!string.IsNullOrEmpty(topic))
                 {
                     lastTopic = topic;
-
                     if (!userInterests.Contains(topic))
                     {
                         userInterests.Add(topic);
@@ -106,18 +123,13 @@ namespace CyberSafeChatbot
                     (string response, string followUp) = knowledgeBase.GetRandomResponse(topic);
 
                     if (!string.IsNullOrEmpty(userSentiment))
-                    {
                         response = knowledgeBase.GetSentimentResponse(response, userSentiment);
-                    }
-
-                    if (userInterests.Count > 1 && topic != userInterests[^1])
-                    {
-                        response += $"\nYou’ve also shown interest in {ToTitleCase(userInterests[^2])}. Feel free to ask more about it anytime.";
-                    }
 
                     if (!askedFollowUp && !string.IsNullOrEmpty(followUp))
                     {
-                        response += $"\n{followUp}";
+                        response += $"\n{followUp} (yes/no)";
+                        waitingForYesNo = true;
+                        pendingFollowUpTopic = topic;
                     }
                     else
                     {
@@ -148,7 +160,6 @@ namespace CyberSafeChatbot
                 }
                 else
                 {
-                    // Fallback handling
                     string fallback = knowledgeBase.GetResponse(input);
                     await ConsoleUI.TypeTextAsync(fallback);
                     await AudioManager.PlayAudioAsync("unknown.wav");
